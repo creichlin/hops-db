@@ -19,9 +19,11 @@ public class AnnotationTableModel<T> implements TableModel<T>{
   private List<AnnotationColumnModel<T>> columns = new ArrayList<>();
   private Map<String, AnnotationColumnModel<T>> allByName = new HashMap<>();
   private String name;
+  private Class<T> type;
   
   public AnnotationTableModel(Class<T> type) {
     name = AnnotationModelProvider.getTableName(type);
+    this.type = type;
     Class<?> current = type;
     
     while (current != null) {
@@ -88,5 +90,10 @@ public class AnnotationTableModel<T> implements TableModel<T>{
       throw new NoSuchColumn(field);
     }
     return column;
+  }
+
+  @Override
+  public Class<T> getType() {
+    return type;
   }
 }

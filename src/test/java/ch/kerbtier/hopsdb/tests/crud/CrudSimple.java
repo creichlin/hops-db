@@ -8,17 +8,11 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 import ch.kerbtier.hopsdb.Db;
+import ch.kerbtier.hopsdb.tests.TestBase;
 import ch.kerbtier.hopsdb.tests.crud.models.Simple;
 import ch.kerbtier.hopsdb.tests.util.Util;
 
-public class CrudSimple implements CrudInterface {
-
-  private Db db;
-
-  @BeforeMethod
-  public void setup() {
-    db = Util.create(this);
-  }
+public class CrudSimple extends TestBase implements CrudInterface {
 
   @Override
   @Test
@@ -30,7 +24,7 @@ public class CrudSimple implements CrudInterface {
     Simple dt2 = db.select(Simple.class, dt.getId());
 
     assertEquals(dt.getValue1(), dt2.getValue1());
-    assertEquals(1, db.count(Simple.class));
+    assertEquals(1, db.select(Simple.class).count());
     db.commit();
   }
 
@@ -41,11 +35,11 @@ public class CrudSimple implements CrudInterface {
     db.create(dt);
     db.commit();
 
-    assertEquals(1, db.count(Simple.class));
+    assertEquals(1, db.select(Simple.class).count());
 
     db.delete(dt);
 
-    assertEquals(0, db.count(Simple.class));
+    assertEquals(0, db.select(Simple.class).count());
     db.commit();
   }
 
@@ -87,7 +81,7 @@ public class CrudSimple implements CrudInterface {
     db.create(new Simple("valueD"));
     db.commit();
     
-    List<Simple> all = db.select(Simple.class);
+    List<Simple> all = db.select(Simple.class).listAll();
     assertEquals(4, all.size());
     db.commit();
   }

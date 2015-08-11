@@ -56,7 +56,7 @@ public class DbPs {
     rs.next();
     return rs.getLong(1);
   }
-  
+
   public ResultSet getGeneratedKeys() throws SQLException {
     return ps.getGeneratedKeys();
   }
@@ -110,10 +110,10 @@ public class DbPs {
   public <T> T selectFirst(Class<T> type) throws SQLException {
     List<T> list = select(type);
 
-    if(list.size() == 0) {
+    if (list.size() == 0) {
       throw new NoMatchFound("no match found for " + ps);
     }
-    
+
     return list.get(0);
   }
 
@@ -130,8 +130,9 @@ public class DbPs {
   }
 
   /**
-   * calls for each id in ids the select method which executes the query.
-   * id is set as the first slot/?
+   * calls for each id in ids the select method which executes the query. id is
+   * set as the first slot/?
+   * 
    * @param type
    * @param ids
    * @return
@@ -151,27 +152,27 @@ public class DbPs {
   public int setEntityColumns(Object object) throws SQLException {
     return setEntityColumns(object, 1);
   }
-  
+
   public int setEntityColumns(Object object, int index) throws SQLException {
     TableModel<Object> tm = (TableModel<Object>) db.getModels().getModel(object.getClass());
     return setColumns(object, tm.columns(), index);
   }
-  
-  public int setEntityForColumns(Object object, int index, String...cols) throws SQLException {
+
+  public int setEntityForColumns(Object object, int index, String... cols) throws SQLException {
     TableModel<Object> tm = (TableModel<Object>) db.getModels().getModel(object.getClass());
     List<ColumnModel<Object>> models = new ArrayList<>();
-    
-    for(String field: cols) {
+
+    for (String field : cols) {
       models.add(tm.getColumn(field));
     }
-    
+
     return setColumns(object, models, index);
   }
 
   public int setEntityKeys(Object object) throws SQLException {
     return setEntityKeys(object, 1);
   }
-  
+
   public int setEntityKeys(Object object, int index) throws SQLException {
     TableModel<Object> tm = (TableModel<Object>) db.getModels().getModel(object.getClass());
     return setColumns(object, tm.keys(), index);
@@ -180,29 +181,41 @@ public class DbPs {
   public int setEntity(Object object) throws SQLException {
     return setEntity(object, 1);
   }
-  
+
   public int setEntity(Object object, int index) throws SQLException {
     TableModel<Object> tm = (TableModel<Object>) db.getModels().getModel(object.getClass());
     Iterable<ColumnModel<Object>> cols = Iterables.concat(tm.columns(), tm.keys());
-    
+
     return setColumns(object, cols, index);
   }
 
   private int setColumns(Object object, Iterable<ColumnModel<Object>> cols, int start) throws SQLException {
     int index = start;
-    for(ColumnModel<Object> cm: cols) {
-      if(cm.is(String.class)) {
-        setString(index++, cm.get(object, String.class));
-      } else if(cm.is(Long.class)) {
-        setLong(index++, cm.get(object, Long.class));
-      } else if(cm.is(Integer.class)) {
-        setInt(index++, cm.get(object, Integer.class));
-      } else if(cm.is(Date.class)) {
-        setDateTime(index++, cm.get(object, Date.class));
-      } else if(cm.is(BigDecimal.class)) {
-        setBigDecimal(index++, cm.get(object, BigDecimal.class));
-      }
+    for (ColumnModel<Object> cm : cols) {
+      Object value = cm.get(object);
+
+      setParameter(index++, value);
     }
     return index;
+  }
+
+  public void setParameters(List<Object> parameters) throws SQLException {
+    for (int cnt = 0; cnt < parameters.size(); cnt++) {
+      setParameter(cnt + 1, parameters.get(cnt));
+    }
+  }
+
+  public void setParameter(int index, Object value) throws SQLException {
+    if (value instanceof String) {
+      setString(index, (String) value);
+    } else if (value instanceof Long) {
+      setLong(index, (Long) value);
+    } else if (value instanceof Integer) {
+      setInt(index, (Integer) value);
+    } else if (value instanceof Date) {
+      setDateTime(index, (Date) value);
+    } else if (value instanceof BigDecimal) {
+      setBigDecimal(index, (BigDecimal) value);
+    }
   }
 }

@@ -1,28 +1,21 @@
 package ch.kerbtier.hopsdb;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import ch.kerbtier.hopsdb.exceptions.DbSQLException;
 import ch.kerbtier.hopsdb.exceptions.NoMatchFound;
 import ch.kerbtier.hopsdb.exceptions.WrongNumberOfKeys;
 import ch.kerbtier.hopsdb.model.ColumnModel;
@@ -38,7 +31,7 @@ public class Db {
   private int commits = 0;
   private int rollbacks = 0;
   private int statements = 0;
-  
+
   private ModelProvider models;
 
   public Db(String url, ModelProvider models) {
@@ -85,31 +78,15 @@ public class Db {
     return connection.get();
   }
 
-  public boolean hasTables(boolean caseSensitive, String... tables) throws SQLException {
+  public boolean hasTables(String... tables) throws SQLException {
     Set<String> required = new HashSet<>();
-    Set<String> found = new HashSet<>();
+    Set<String> found = getTableNames();
 
     for (String req : tables) {
-      if (caseSensitive) {
-        required.add(req);
-      } else {
-        required.add(req.toUpperCase());
-      }
-    }
-
-    for (String fo : getTableNames()) {
-      if (caseSensitive) {
-        found.add(fo);
-      } else {
-        found.add(fo.toUpperCase());
-      }
+      required.add(req.toUpperCase());
     }
 
     return found.containsAll(required);
-  }
-
-  public boolean hasTables(String... tables) throws SQLException {
-    return hasTables(false, tables);
   }
 
   /**
@@ -154,115 +131,37 @@ public class Db {
     }
   }
 
-  public DbPs prepareStatement(String sql) {
+  public DbPs prepareStatement(String sql) throws SQLException {
     return prepareStatement(sql, false);
   }
 
-  public DbPs prepareStatement(String sql, boolean returnKeys) {
-      statements++;
-      PreparedStatement ps;
-      try {
-        ps = getConnection().prepareStatement(sql,
-            returnKeys ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS);
-      } catch (SQLException e) {
-        throw new DbSQLException(e);
-      }
-      return new DbPs(this, ps, sql);
+  public DbPs prepareStatement(String sql, boolean returnKeys) throws SQLException {
+    statements++;
+    PreparedStatement ps;
+      ps = getConnection().prepareStatement(sql,
+          returnKeys ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS);
+    return new DbPs(this, ps, sql);
   }
 
   /**
    * selects one single row, keys is given as parameter, only one key supported
    * because order is undefined.
+   * 
+   * is a shortcut for return select(type).byPk(id).first();
    */
   public <X> X select(Class<X> type, int id) throws SQLException, NoMatchFound {
-    TableModel<?> tModel = models.getModel(type);
-
-    if (tModel.keysCount() != 1) {
-      throw new WrongNumberOfKeys("model must have exact one key to select by id but has " + tModel.keysCount());
-    }
-
-    DbPs ps = prepareStatement("select * from `" + tModel.getName() + "` where `"
-        + tModel.keys().iterator().next().getName() + "` = ?");
-    ps.setInt(1, id);
-
-    DbRs rs = ps.executeQuery();
-    if (rs.next()) {
-      return rs.populate(type);
-    } else {
-      throw new NoMatchFound("no instance found for key " + id);
-    }
+    return select(type).byPk(id).first();
   }
 
-  public <X> List<X> select(Class<X> type) throws SQLException {
-    TableModel<?> tModel = models.getModel(type);
-
-    DbPs ps = prepareStatement("select * from `" + tModel.getName() + "`");
-    DbRs rs = ps.executeQuery();
-
-    List<X> result = new ArrayList<>();
-    while (rs.next()) {
-      result.add(rs.populate(type));
-    }
-
-    return result;
+  public <X> Query<X> select(Class<X> type) {
+    TableModel<X> tModel = models.getModel(type);
+    
+    Query<X> query = new Query<>(this, tModel);
+    
+    return query;
   }
 
-  /**
-   * selects one single row, identified by where and params
-   */
-  public <X> X selectFirst(Class<X> type, String where, Object... params) throws SQLException, NoMatchFound {
-    TableModel<?> tModel = models.getModel(type);
-
-    DbPs ps = prepareStatement("select * from `" + tModel.getName() + "` where " + where);
-    int pos = 1;
-    for (Object p : params) {
-      if (p instanceof String) {
-        ps.setString(pos++, (String) p);
-      } else if (p instanceof Date) {
-        ps.setDate(pos++, (Date) p);
-      } else if (p instanceof Integer) {
-        ps.setInt(pos++, (Integer) p);
-      } else {
-        throw new RuntimeException("invalid param " + p);
-      }
-    }
-
-    DbRs rs = ps.executeQuery();
-    if (rs.next()) {
-      return rs.populate(type);
-    } else {
-      throw new NoMatchFound("no instance found for " + where + " : " + params);
-    }
-  }
-
-  /**
-   * selects all found elements, identified by where and params
-   */
-  public <X> List<X> select(Class<X> type, String where, Object... params) throws SQLException {
-    TableModel<?> tModel = models.getModel(type);
-    List<X> result = new ArrayList<>();
-    DbPs ps = prepareStatement("select * from `" + tModel.getName() + "` where " + where);
-    int pos = 1;
-    for (Object p : params) {
-      if (p instanceof String) {
-        ps.setString(pos++, (String) p);
-      } else if (p instanceof Date) {
-        ps.setDate(pos++, (Date) p);
-      } else if (p instanceof Integer) {
-        ps.setInt(pos++, (Integer) p);
-      } else {
-        throw new RuntimeException("invalid param " + p);
-      }
-    }
-
-    DbRs rs = ps.executeQuery();
-    while (rs.next()) {
-      result.add(rs.populate(type));
-    }
-    return result;
-  }
-
-  public DbPs prepareDelete(Class<?> type) {
+  private DbPs prepareDelete(Class<?> type) throws SQLException {
     TableModel<?> tModel = models.getModel(type);
 
     if (!tModel.keys().iterator().hasNext()) {
@@ -290,8 +189,9 @@ public class Db {
    * 
    * @param type
    * @return
+   * @throws SQLException 
    */
-  public DbPs prepareUpdate(Class<?> type) {
+  private DbPs prepareUpdate(Class<?> type) throws SQLException {
     TableModel<?> tModel = models.getModel(type);
 
     if (!tModel.keys().iterator().hasNext()) {
@@ -327,8 +227,9 @@ public class Db {
    * @param type
    * @param explicitKeys
    * @return
+   * @throws SQLException 
    */
-  public DbPs prepareCreate(Class<?> type, String... explicitKeys) {
+  private DbPs prepareCreate(Class<?> type, String... explicitKeys) throws SQLException {
     TableModel<?> tModel = models.getModel(type);
 
     StringBuilder statemenet = new StringBuilder("INSERT INTO " + tModel.getName() + " (");
@@ -358,16 +259,6 @@ public class Db {
     }
     statemenet.append(")");
     return prepareStatement(statemenet.toString(), true);
-  }
-
-  public int count(Class<?> type) throws SQLException {
-    TableModel<?> tModel = models.getModel(type);
-    String sql = "SELECT COUNT(*) FROM " + tModel.getName();
-    DbPs ps = prepareStatement(sql);
-    DbRs rs = ps.executeQuery();
-    rs.next();
-
-    return rs.getInt(1);
   }
 
   /**
@@ -416,45 +307,6 @@ public class Db {
   public void destroy() {
     try {
       DataSources.destroy(ds);
-      Logger logger = Logger.getLogger(Db.class.getName());
-      try {
-        Class<?> cls = Class.forName("com.mysql.jdbc.AbandonedConnectionCleanupThread");
-        Method mth = (cls == null ? null : cls.getMethod("shutdown"));
-        if (mth != null) {
-          logger.info("MySQL connection cleanup thread shutdown");
-          mth.invoke(null);
-          logger.info("MySQL connection cleanup thread shutdown successful");
-        }
-      } catch (Throwable thr) {
-        logger.warning("Failed to shutdown SQL connection cleanup thread (might cause memory leak): "
-            + thr.getMessage());
-        thr.printStackTrace();
-      }
-
-      // Now deregister JDBC drivers in this context's ClassLoader:
-      // Get the webapp's ClassLoader
-      ClassLoader cl = Thread.currentThread().getContextClassLoader();
-      // Loop through all drivers
-      Enumeration<Driver> drivers = DriverManager.getDrivers();
-      while (drivers.hasMoreElements()) {
-        Driver driver = drivers.nextElement();
-        if (driver.getClass().getClassLoader() == cl) {
-          // This driver was registered by the webapp's ClassLoader, so
-          // deregister it:
-          try {
-            logger.info("Deregistering JDBC driver " + driver);
-            DriverManager.deregisterDriver(driver);
-          } catch (SQLException ex) {
-            logger.warning("Error deregistering JDBC driver " + driver + " " + ex.getMessage());
-          }
-        } else {
-          // driver was not registered by the webapp's ClassLoader and may be in
-          // use elsewhere
-          logger
-              .fine("Not deregistering JDBC driver " + driver + " as it does not belong to this webapp's ClassLoader");
-        }
-      }
-
     } catch (SQLException e) {
       throw new RuntimeException(e);
     }
@@ -463,7 +315,7 @@ public class Db {
   public boolean hasOpenConnection() {
     return connection.get() != null;
   }
-  
+
   public ModelProvider getModels() {
     return models;
   }

@@ -23,6 +23,8 @@ public class Util {
     
     Db db = new Db("jdbc:h2:mem:name" + (counter++) + ";USER=test;PASSWORD=test", amp);
 
+    System.out.println("got db " + (counter - 1));
+    
     URL url = Resources.getResource(context.getClass(), name);
     try {
       String code = Resources.toString(url, Charsets.UTF_8);

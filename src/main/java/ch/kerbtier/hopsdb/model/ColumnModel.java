@@ -6,4 +6,5 @@ public interface ColumnModel<T> {
   void set(T instance, Object value);
   boolean is(Class<?> t);
   <R> R get(T instance, Class<R> pt);
+  Object get(T instancer);
 }

@@ -10,17 +10,11 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 import ch.kerbtier.hopsdb.Db;
+import ch.kerbtier.hopsdb.tests.TestBase;
 import ch.kerbtier.hopsdb.tests.crud.models.InheritanceChild;
 import ch.kerbtier.hopsdb.tests.util.Util;
 
-public class CrudInheritance implements CrudInterface {
-
-  private Db db;
-
-  @BeforeMethod
-  public void setup() {
-    db = Util.create(this);
-  }
+public class CrudInheritance extends TestBase implements CrudInterface {
 
   @Override
   @Test()
@@ -32,7 +26,7 @@ public class CrudInheritance implements CrudInterface {
     InheritanceChild dt2 = db.select(InheritanceChild.class, dt.getIdentifier());
 
     assertEquals(dt.getValue1(), dt2.getValue1());
-    assertEquals(1, db.count(InheritanceChild.class));
+    assertEquals(1, db.select(InheritanceChild.class).count());
     db.commit();
   }
 
@@ -43,11 +37,11 @@ public class CrudInheritance implements CrudInterface {
     db.create(dt);
     db.commit();
 
-    assertEquals(1, db.count(InheritanceChild.class));
+    assertEquals(1, db.select(InheritanceChild.class).count());
 
     db.delete(dt);
 
-    assertEquals(0, db.count(InheritanceChild.class));
+    assertEquals(0, db.select(InheritanceChild.class).count());
     db.commit();
   }
 
@@ -89,7 +83,7 @@ public class CrudInheritance implements CrudInterface {
     db.create(new InheritanceChild("valueD"));
     db.commit();
     
-    List<InheritanceChild> all = db.select(InheritanceChild.class);
+    List<InheritanceChild> all = db.select(InheritanceChild.class).listAll();
     assertEquals(4, all.size());
     db.commit();
   }

@@ -13,4 +13,6 @@ public interface TableModel<T> extends Iterable<ColumnModel<T>> {
 
   ColumnModel<T> getColumn(String field);
 
+  Class<T> getType();
+
 }

@@ -35,6 +35,15 @@ public class AnnotationColumnModel<T> implements ColumnModel<T> {
     }
     throw new RuntimeException("wrong type");
   }
+  
+  @Override
+  public Object get(T instance) {
+    try {
+      return field.get(instance);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   @Override
   public void set(T instance, Object value) {

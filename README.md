@@ -42,18 +42,30 @@ Create and save instance:
 
 Find instance with id 1:
  
-    Simple simple = db.select(Simple.class, 1);
+    Simple simple = db.select(Simple.class).byPk(1).first();
+    
+Find all instances
+
+    List<Simple> simples = db.select(Simple.class).listAll();
+
+Find some by where
+
+    List<Simple> simples = db.select(Simple.class).where("value like ? or value = ?", "bar%", "foo").listAll();
+    
+Count...
+
+    int howMany = db.select(Simple.class).where("value like ? or value = ?", "bar%", "foo").count();
 
 Update instance:
 
-    Simple simple = db.select(Simple.class, 1);
+    Simple simple = db.select(Simple.class).byPk(1).first();
     simple.setValue("bar");
-    db.update();
+    db.update(bar);
 
 Delete instance:
 
-    Simple simple = db.select(Simple.class, 1);
-    db.selete(simple);
+    Simple simple = db.select(Simple.class).byPk(1).first();
+    db.delete(simple);
 
 
 
