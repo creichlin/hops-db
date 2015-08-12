@@ -7,6 +7,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
+import ch.kerbtier.hopsdb.exceptions.InvalidQueryException;
 import ch.kerbtier.hopsdb.tests.models.QtSimple;
 
 public class QueryTests extends TestBase {
@@ -52,6 +53,16 @@ public class QueryTests extends TestBase {
     QtSimple first = db.select(QtSimple.class).byPk(i1.getId()).first();
     
     assertNotNull(first);
+  }
+  
+  @Test(expectedExceptions = {InvalidQueryException.class})
+  public void selectFirstByPKAndWhere() throws SQLException {
+    db.select(QtSimple.class).byPk(i1.getId()).where("id = ?", i1.getId()).first();
+  }
+  
+  @Test(expectedExceptions = {InvalidQueryException.class})
+  public void selectFirstByWhereAndPk() throws SQLException {
+    db.select(QtSimple.class).where("id = ?", i1.getId()).byPk(i1.getId()).first();
   }
   
   @Test

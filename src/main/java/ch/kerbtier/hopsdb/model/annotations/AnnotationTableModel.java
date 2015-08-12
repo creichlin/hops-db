@@ -1,9 +1,7 @@
 package ch.kerbtier.hopsdb.model.annotations;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,16 +30,20 @@ public class AnnotationTableModel<T> implements TableModel<T>{
         if (a != null) {
           field.setAccessible(true);
           AnnotationColumnModel<T> cm = new AnnotationColumnModel<>(field, a.key(), AnnotationModelProvider.getColumnName(field));
-          if (String.class.isAssignableFrom(field.getType())) {
-            cm.setType(String.class);
-          } else if (Integer.TYPE.isAssignableFrom(field.getType()) || Integer.class.isAssignableFrom(field.getType())) {
+          if (field.getType().equals(Integer.TYPE)) {
             cm.setType(Integer.class);
-          } else if (Long.TYPE.isAssignableFrom(field.getType()) || Long.class.isAssignableFrom(field.getType())) {
+          } else if (field.getType().equals(Long.TYPE)) {
             cm.setType(Long.class);
-          } else if (Date.class.isAssignableFrom(field.getType())) {
-            cm.setType(Date.class);
-          } else if (BigDecimal.class.isAssignableFrom(field.getType())) {
-            cm.setType(BigDecimal.class);
+          } else if (field.getType().equals(Short.TYPE)) {
+            cm.setType(Short.class);
+          } else if (field.getType().equals(Boolean.TYPE)) {
+            cm.setType(Boolean.class);
+          } else if (field.getType().equals(Float.TYPE)) {
+            cm.setType(Float.class);
+          } else if (field.getType().equals(Double.TYPE)) {
+            cm.setType(Double.class);
+          } else {
+            cm.setType(field.getType());
           }
           
           all.add(cm);

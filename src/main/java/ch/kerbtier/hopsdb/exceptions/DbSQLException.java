@@ -8,4 +8,8 @@ public class DbSQLException extends RuntimeException {
     super(e);
   }
 
+  public DbSQLException(String name) {
+    super(name);
+  }
+
 }

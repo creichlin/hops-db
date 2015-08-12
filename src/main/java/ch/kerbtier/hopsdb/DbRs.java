@@ -1,10 +1,9 @@
 package ch.kerbtier.hopsdb;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 
+import ch.kerbtier.hopsdb.impl.Converters;
 import ch.kerbtier.hopsdb.model.ColumnModel;
 import ch.kerbtier.hopsdb.model.TableModel;
 
@@ -20,20 +19,10 @@ public class DbRs {
   public <T> T populate(Class<T> type) {
     try {
       T obj = type.newInstance();
-      
+
       TableModel<T> model = db.getModels().getModel(type);
-      for(ColumnModel<T> cool: model) {
-        if(cool.is(String.class)) {
-          cool.set(obj, getString(cool.getName()));
-        } else if(cool.is(Integer.class)) {
-          cool.set(obj, getInt(cool.getName()));
-        } else if(cool.is(Long.class)) {
-          cool.set(obj, getLong(cool.getName()));
-        } else if(cool.is(Date.class)) {
-          cool.set(obj, getDateTime(cool.getName()));
-        } else if(cool.is(BigDecimal.class)) {
-          cool.set(obj, getBigDecimal(cool.getName()));
-        }
+      for (ColumnModel<T> cool : model) {
+        cool.set(obj, get(cool.getName(), cool.getType()));
       }
 
       return obj;
@@ -50,55 +39,31 @@ public class DbRs {
     return rs.isFirst();
   }
 
-  public String getString(String name) throws SQLException {
-    return rs.getString(name);
+  public <T> T get(String name, Class<T> type) throws SQLException {
+    Object value = rs.getObject(name);
+
+    return getWithValue(type, value);
   }
 
-  public Long getLong(int i) throws SQLException {
-    long l = rs.getLong(i);
-    if (rs.wasNull()) {
+  public <T> T get(int index, Class<T> type) throws SQLException {
+    Object value = rs.getObject(index);
+
+    return getWithValue(type, value);
+  }
+
+  private final <T> T getWithValue(Class<T> type, Object value) {
+    if (value == null) {
       return null;
+    } else {
+      Class<?> expected = type;
+
+      // expected is exactly what we have
+      if (value.getClass().equals(type)) {
+        return (T) value;
+      }
+
+      // lets delegate task to converter
+      return (T) Converters.convert(value, expected);
     }
-    return l;
-  }
-
-  public Integer getInt(String name) throws SQLException {
-    int ii = rs.getInt(name);
-    if (rs.wasNull()) {
-      return null;
-    }
-    return ii;
-  }
-
-  public Date getDate(String name) throws SQLException {
-    return rs.getDate(name);
-  }
-
-  public Date getDateTime(String name) throws SQLException {
-    return rs.getTimestamp(name);
-  }
-
-  public Long getLong(String name) throws SQLException {
-    long l = rs.getLong(name);
-    if (rs.wasNull()) {
-      return null;
-    }
-    return l;
-  }
-
-  public boolean getBoolean(String name) throws SQLException {
-    return rs.getBoolean(name);
-  }
-
-  public Integer getInt(int i) throws SQLException {
-    int ii = rs.getInt(i);
-    if (rs.wasNull()) {
-      return null;
-    }
-    return ii;
-  }
-
-  public BigDecimal getBigDecimal(String name) throws SQLException {
-    return rs.getBigDecimal(name);
   }
 }

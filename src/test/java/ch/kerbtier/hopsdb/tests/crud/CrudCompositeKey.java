@@ -3,15 +3,12 @@ package ch.kerbtier.hopsdb.tests.crud;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
-import ch.kerbtier.hopsdb.Db;
 import ch.kerbtier.hopsdb.exceptions.WrongNumberOfKeys;
 import ch.kerbtier.hopsdb.tests.TestBase;
 import ch.kerbtier.hopsdb.tests.crud.models.CompositeKey;
-import ch.kerbtier.hopsdb.tests.util.Util;
 
 public class CrudCompositeKey extends TestBase implements CrudInterface {
 

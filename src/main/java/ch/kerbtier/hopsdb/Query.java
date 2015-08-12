@@ -87,7 +87,7 @@ public class Query<T> {
     DbRs rs = ps.executeQuery();
 
     rs.next();
-    return rs.getInt(1);
+    return rs.get(1, Integer.class);
   }
 
   public Query<T> byPk(long pk_) {

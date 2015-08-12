@@ -67,4 +67,9 @@ public class AnnotationColumnModel<T> implements ColumnModel<T> {
   public String getName() {
     return name;
   }
+
+  @Override
+  public Class<?> getType() {
+    return type;
+  }
 }
