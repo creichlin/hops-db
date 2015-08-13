@@ -13,4 +13,8 @@ CREATE TABLE datatypes (
   
   float_real real,
   double_double double,
+  
+  byte_blob blob,
+  
+  boolean_boolean boolean,
 );

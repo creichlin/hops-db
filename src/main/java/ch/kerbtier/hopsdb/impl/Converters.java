@@ -3,6 +3,7 @@ package ch.kerbtier.hopsdb.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import ch.kerbtier.hopsdb.impl.converters.BlobToByteArray;
 import ch.kerbtier.hopsdb.impl.converters.ClobToString;
 import ch.kerbtier.hopsdb.impl.converters.DateTime;
 import ch.kerbtier.hopsdb.impl.converters.NumberToLong;
@@ -20,6 +21,7 @@ public class Converters {
     register(new SqlTimeToDate());
     register(new NumberToInteger());
     register(new NumberToLong());
+    register(new BlobToByteArray());
   }
   
   public static void register(Converter<?, ?> converter) {

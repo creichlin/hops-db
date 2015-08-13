@@ -40,6 +40,12 @@ public class Datatypes {
 
   @Column
   private double doubleDouble;
+  
+  @Column
+  private byte[] byteBlob;
+
+  @Column
+  private boolean booleanBoolean;
 
   public Date getDate() {
     return date;
@@ -121,4 +127,19 @@ public class Datatypes {
     this.intInt = intInt;
   }
 
+  public byte[] getByteBlob() {
+    return byteBlob;
+  }
+
+  public void setByteBlob(byte[] byteBlob) {
+    this.byteBlob = byteBlob;
+  }
+
+  public boolean isBooleanBoolean() {
+    return booleanBoolean;
+  }
+
+  public void setBooleanBoolean(boolean booleanBoolean) {
+    this.booleanBoolean = booleanBoolean;
+  }
 }

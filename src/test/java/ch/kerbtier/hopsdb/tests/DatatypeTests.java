@@ -57,28 +57,28 @@ public class DatatypeTests extends TestBase {
   public void testIntegerMax() throws SQLException {
     entity.setIntInt(Integer.MAX_VALUE);
     saveAndReload();
-    assertEquals(entity.getIntInt(), (Integer)Integer.MAX_VALUE);
+    assertEquals(entity.getIntInt(), (Integer) Integer.MAX_VALUE);
   }
 
   @Test
   public void testIntegerMin() throws SQLException {
     entity.setIntInt(Integer.MIN_VALUE);
     saveAndReload();
-    assertEquals(entity.getIntInt(), (Integer)Integer.MIN_VALUE);
+    assertEquals(entity.getIntInt(), (Integer) Integer.MIN_VALUE);
   }
 
   @Test
   public void testSmallIntMax() throws SQLException {
-    entity.setIntSmall((int)Short.MAX_VALUE);
+    entity.setIntSmall((int) Short.MAX_VALUE);
     saveAndReload();
-    assertEquals(entity.getIntSmall(), (Integer)(int)Short.MAX_VALUE);
+    assertEquals(entity.getIntSmall(), (Integer) (int) Short.MAX_VALUE);
   }
 
   @Test
   public void testSmallIntMin() throws SQLException {
-    entity.setIntSmall((int)Short.MIN_VALUE);
+    entity.setIntSmall((int) Short.MIN_VALUE);
     saveAndReload();
-    assertEquals(entity.getIntSmall(), (Integer)(int)Short.MIN_VALUE);
+    assertEquals(entity.getIntSmall(), (Integer) (int) Short.MIN_VALUE);
   }
 
   @Test
@@ -137,4 +137,21 @@ public class DatatypeTests extends TestBase {
     assertEquals(entity.getDoubleDouble(), Math.PI);
   }
 
+  @Test
+  public void testByteBlob() throws SQLException {
+    entity.setByteBlob(new byte[] { 1, 2, 3, 4, 5, 6, -1, -2, -3 });
+    saveAndReload();
+    assertEquals(entity.getByteBlob(), new byte[] { 1, 2, 3, 4, 5, 6, -1, -2, -3 });
+  }
+
+  @Test
+  public void testBoolean() throws SQLException {
+    entity.setBooleanBoolean(true);
+    saveAndReload();
+    assertEquals(entity.isBooleanBoolean(), true);
+
+    entity.setBooleanBoolean(false);
+    saveAndReload();
+    assertEquals(entity.isBooleanBoolean(), false);
+  }
 }
