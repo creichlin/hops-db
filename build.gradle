@@ -17,7 +17,7 @@ def getVersionName = { ->
     commandLine 'git', 'describe', '--tags', '--match', 'V-*.*'
     standardOutput = stdout
   }
-  def v = stdout.toString().trim() =~ /V-(\d+)\.(\d+)(:?-(\d+)-)?/
+  def v = stdout.toString().trim() =~ /V-(\d+)\.(\d+)(?:-(\d+)-)?/
   return v[0][1] + "." + v[0][2] + "." + (v[0][3] == null ? 0 : v[0][3])
 }
 
