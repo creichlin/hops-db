@@ -17,6 +17,7 @@ public class Query<T> {
   
   private Long pk = null;
   private Where where = null;
+  private Order order = null;
   
   public Query(Db db, TableModel<T> select) {
     this.select = select;
@@ -45,6 +46,11 @@ public class Query<T> {
     } else if(where != null) {
       query += " where " + where.build(parameters);
     }
+    
+    if(order != null) {
+      query += order.asSql();
+    }
+    
     
     if(type == Type.SELECT_FIRST) {
       query += " limit 0, 1";
@@ -97,6 +103,9 @@ public class Query<T> {
     if(where != null) {
       throw new InvalidQueryException("cannot select by pk if where exists");
     }
+    if(order != null) {
+      throw new InvalidQueryException("cannot select by pk if order exists");
+    }
     this.pk = pk_;
     return this;
   }
@@ -106,6 +115,21 @@ public class Query<T> {
       throw new InvalidQueryException("cannot select by where if pk exists");
     }
     where = new QueryWhere(whereQuery, parameters);
+    return this;
+  }
+
+  public Query<T> orderBy(String orderElement) {
+    if(pk != null) {
+      throw new InvalidQueryException("can not order element selected by pk");
+    }
+    
+    
+    if(order == null) {
+      order = new Order();
+    }
+
+    order.add(orderElement);
+    
     return this;
   }
 }
