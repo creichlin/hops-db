@@ -3,6 +3,7 @@ package ch.kerbtier.hopsdb;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import ch.kerbtier.hopsdb.exceptions.InvalidCursorException;
 import ch.kerbtier.hopsdb.impl.Converters;
 import ch.kerbtier.hopsdb.model.ColumnModel;
 import ch.kerbtier.hopsdb.model.TableModel;
@@ -10,13 +11,21 @@ import ch.kerbtier.hopsdb.model.TableModel;
 public class DbRs {
   private ResultSet rs;
   private Db db;
+  private boolean validCursor = false;
 
   public DbRs(Db db, ResultSet rs) {
     this.rs = rs;
     this.db = db;
   }
 
+  /**
+   * creates a new instance of type and populates attributes from current sql row
+   * @param type
+   * @return
+   */
   public <T> T populate(Class<T> type) {
+    checkIfValidCursor();
+    
     try {
       T obj = type.newInstance();
 
@@ -31,8 +40,15 @@ public class DbRs {
     }
   }
 
+  private void checkIfValidCursor() {
+    if(! validCursor) {
+      throw new InvalidCursorException("call next but not to often");
+    }
+  }
+
   public boolean next() throws SQLException {
-    return rs.next();
+    validCursor = rs.next();
+    return validCursor;
   }
 
   public boolean isFirst() throws SQLException {
@@ -40,18 +56,19 @@ public class DbRs {
   }
 
   public <T> T get(String name, Class<T> type) throws SQLException {
+    checkIfValidCursor();
     Object value = rs.getObject(name);
-
     return getWithValue(type, value);
   }
 
   public <T> T get(int index, Class<T> type) throws SQLException {
+    checkIfValidCursor();
     Object value = rs.getObject(index);
-
     return getWithValue(type, value);
   }
 
   private final <T> T getWithValue(Class<T> type, Object value) {
+    checkIfValidCursor();
     if (value == null) {
       return null;
     } else {

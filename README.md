@@ -9,7 +9,7 @@ Why?
 ----
 
 Many Object relational mapping/JPA implementations are very powerful and complex and in some cases tricky. They have come a long way
-in the last 10 years but sometimes i still like to have a simple and thin layer on top of JDBC to make live a bit easier.
+in the last 10 years but sometimes I still like to have a simple and thin layer on top of JDBC to make live a bit easier.
 
 Basic examples
 --------------

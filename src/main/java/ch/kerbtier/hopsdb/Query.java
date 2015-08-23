@@ -132,6 +132,14 @@ public class Query<T> {
     
     return this;
   }
+
+  public DbRs resultSet() throws SQLException {
+    List<Object> parameters = new ArrayList<>();
+    DbPs ps = db.prepareStatement(createQuery(Type.SELECT, parameters));
+    ps.setParameters(parameters);
+    DbRs rs = ps.executeQuery();
+    return rs;
+  }
 }
 
 enum Type {

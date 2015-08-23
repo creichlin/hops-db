@@ -9,7 +9,7 @@ plugins {
 
 
 /*
- * Gets the version name from the latest Git tag
+ * Gets the version name from the latest Git tag of the form V-X.Y where X and Y are version numbers
  */
 def getVersionName = { ->
   def stdout = new ByteArrayOutputStream()

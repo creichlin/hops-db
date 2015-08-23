@@ -145,7 +145,7 @@ public class Db {
 
   /**
    * selects one single row, keys is given as parameter, only one key supported
-   * because order is undefined.
+   * because order of keys is unknown.
    * 
    * is a shortcut for return select(type).byPk(id).first();
    */
