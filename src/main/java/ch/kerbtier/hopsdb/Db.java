@@ -90,7 +90,7 @@ public class Db {
   }
 
   /**
-   * get table names with no case change
+   * get table names, always as uppercase
    */
   public Set<String> getTableNames() throws SQLException {
     DatabaseMetaData dbmd = getConnection().getMetaData();
@@ -98,7 +98,7 @@ public class Db {
     ResultSet rs = dbmd.getTables(null, null, "%", null);
     Set<String> foundTables = new HashSet<>();
     while (rs.next()) {
-      foundTables.add(rs.getString(3));
+      foundTables.add(rs.getString(3).toUpperCase());
     }
     return foundTables;
   }
