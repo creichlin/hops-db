@@ -32,6 +32,8 @@ public class Db {
   private int rollbacks = 0;
   private int statements = 0;
 
+  private boolean printStatements = false;
+
   private ModelProvider models;
 
   public Db(String url, ModelProvider models) {
@@ -111,6 +113,7 @@ public class Db {
         con.commit();
         con.close();
         commits++;
+        print("COMMIT");
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -125,6 +128,7 @@ public class Db {
         con.rollback();
         con.close();
         rollbacks++;
+        print("ROLLBACK");
       }
     } catch (SQLException e) {
       e.printStackTrace();
@@ -138,8 +142,8 @@ public class Db {
   public DbPs prepareStatement(String sql, boolean returnKeys) throws SQLException {
     statements++;
     PreparedStatement ps;
-      ps = getConnection().prepareStatement(sql,
-          returnKeys ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS);
+    ps = getConnection().prepareStatement(sql,
+        returnKeys ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS);
     return new DbPs(this, ps, sql);
   }
 
@@ -155,9 +159,9 @@ public class Db {
 
   public <X> Query<X> select(Class<X> type) {
     TableModel<X> tModel = models.getModel(type);
-    
+
     Query<X> query = new Query<>(this, tModel);
-    
+
     return query;
   }
 
@@ -189,7 +193,7 @@ public class Db {
    * 
    * @param type
    * @return
-   * @throws SQLException 
+   * @throws SQLException
    */
   private DbPs prepareUpdate(Class<?> type) throws SQLException {
     TableModel<?> tModel = models.getModel(type);
@@ -227,7 +231,7 @@ public class Db {
    * @param type
    * @param explicitKeys
    * @return
-   * @throws SQLException 
+   * @throws SQLException
    */
   private DbPs prepareCreate(Class<?> type, String... explicitKeys) throws SQLException {
     TableModel<?> tModel = models.getModel(type);
@@ -319,4 +323,19 @@ public class Db {
   public ModelProvider getModels() {
     return models;
   }
+
+  public boolean isPrintStatements() {
+    return printStatements;
+  }
+
+  public void setPrintStatements(boolean printStatements) {
+    this.printStatements = printStatements;
+  }
+
+  public void print(String sql) {
+    if(printStatements) {
+      System.out.println("STATEMENT: " + sql);
+    }
+  }
+
 }

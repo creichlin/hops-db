@@ -22,6 +22,7 @@ public class Util {
     AnnotationModelProvider amp = new AnnotationModelProvider();
     
     Db db = new Db("jdbc:h2:mem:name" + (counter++) + ";USER=test;PASSWORD=test", amp);
+    db.setPrintStatements(true);
 
     System.out.println("got db " + (counter - 1));
     

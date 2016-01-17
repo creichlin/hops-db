@@ -14,7 +14,6 @@ import com.google.common.collect.Iterables;
 
 public class DbPs {
   private PreparedStatement ps;
-  @SuppressWarnings("unused")
   private String sql;
   private Db db;
 
@@ -25,10 +24,12 @@ public class DbPs {
   }
 
   public int executeUpdate() throws SQLException {
+    db.print(sql);
     return ps.executeUpdate();
   }
 
   public DbRs executeQuery() throws SQLException {
+    db.print(sql);
     return new DbRs(db, ps.executeQuery());
   }
 
